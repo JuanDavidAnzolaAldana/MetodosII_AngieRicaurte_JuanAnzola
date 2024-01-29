@@ -22,21 +22,26 @@ class particle:
         self.r=radius
         self.color=color
         self.a=0
+        self.u=0
+        self.pas=numpy.zeros(2)
     def past(self,dt:float):
         self.pas=self.pos-(self.vel*dt)+(self.a*dt*dt/2)
     def get_status(self)->numpy.ndarray:
-        state=numpy.zeros((4,2))
+        state=numpy.zeros((5,2))
         state[0]=self.pos
         state[1]=self.vel
         state[2]=self.a
         state[3]=self.mass*self.vel
+        state[4,0]=self.u
         return state
     def collide(self,other)->None:
         d=other.r+self.r-norm(other.pos-self.pos)
         if d>=0:
             other.a+=k*d*(other.pos-self.pos)/norm(other.pos-self.pos)
+            other.u+=k*d*d/2
     def interact(self,colliders:list)->None:
         self.a=0
+        self.u=0
         for i in colliders:
             if i!=self:
                 i.collide(self)
@@ -69,7 +74,7 @@ def simulate(particles:list,bounds:bounding_box,maxtime:float,deltatime:float)->
     colliders.append(bounds)
     info=[]
     for i in tqdm.tqdm(particles, desc="preparando estructuras de datos"):
-        info.append(numpy.zeros((len(timeline),4,2)))
+        info.append(numpy.zeros((len(timeline),5,2)))
     for i in range(len(particles)):
         particles[i].interact(colliders)
         particles[i].past(deltatime)
@@ -93,24 +98,30 @@ def simulation(tf:float,dt:float,fr:int)->None:
                particle(numpy.random.uniform(-19,19,size=2), numpy.random.uniform(-5,5,size=2), 1.0, 1.0, "pink"),
                particle(numpy.random.uniform(-19,19,size=2), numpy.random.uniform(-5,5,size=2), 1.0, 1.0, "gray")]
     info,tl=simulate(particles,box,tf,dt)
-    fig=plt.figure(figsize=(10,10))
-    ax=fig.add_subplot(221)
-    ax1=fig.add_subplot(222)
-    ax2=fig.add_subplot(224)
-    ax3=fig.add_subplot(223)
+    fig=plt.figure(figsize=(12,8))
+    ax=fig.add_subplot(231)
+    ax1=fig.add_subplot(232)
+    ax2=fig.add_subplot(233)
+    ax3=fig.add_subplot(234)
+    ax4=fig.add_subplot(235)
     def start():
         ax.set(xlim=box.get_limits_x(),ylim=box.get_limits_y())
     def update(i):
         ax.clear()
         ax1.clear()
         ax2.clear()
+        ax3.clear()
+        ax4.clear()
         start()
         ax.set_title(r'$ t=%.2f \ s$' %(tl[i*fr]))
         ax1.set_title("Momento lineal en x")
         ax2.set_title("Momento lineal en y")
         ax3.set_title("Energía cinética")
+        ax4.set_title("Energía potencial")
         x1=numpy.zeros_like(tl)
         x2=numpy.zeros_like(tl)
+        x3=numpy.zeros_like(tl)
+        x4=numpy.zeros_like(tl)
         for j in range(len(info)):
             kinetic=numpy.sum(info[j][:,3]*info[j][:,1],axis=1)/2
             st=info[j][i*fr]
@@ -120,14 +131,23 @@ def simulation(tf:float,dt:float,fr:int)->None:
             ax1.plot(tl,info[j][:,3,0],c=particles[j].color)
             ax2.plot(tl,info[j][:,3,1],c=particles[j].color)
             ax3.plot(tl,kinetic,c=particles[j].color)
+            ax4.plot(tl,info[j][:,4,0],c=particles[j].color)
             x1+=info[j][:,3,0]
             x2+=info[j][:,3,1]
+            x3+=kinetic
+            x4+=info[j][:,4,0]
         ax1.plot(tl,x1,linestyle="--",c="red",label="total")
         ax2.plot(tl,x2,linestyle="--",c="red",label="total")
+        ax3.plot(tl,x3,linestyle="--",c="red",label="total")
+        ax4.plot(tl,x4,linestyle="--",c="red",label="total")
         ax1.legend()
         ax2.legend()
+        ax3.legend()
+        ax4.legend()
         ax1.axvline(tl[i*fr],c="r")
         ax2.axvline(tl[i*fr],c="r")
+        ax3.axvline(tl[i*fr],c="r")
+        ax4.axvline(tl[i*fr],c="r")
     start()
     Animation = anim.FuncAnimation(fig,update,frames=int(len(tl)/fr),init_func=start,interval=1000*dt*fr)
     plt.show()

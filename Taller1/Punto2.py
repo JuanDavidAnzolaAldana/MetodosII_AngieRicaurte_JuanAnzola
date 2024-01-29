@@ -82,21 +82,22 @@ def simulate(particles:list,bounds:bounding_box,maxtime:float,deltatime:float)->
     return (info,timeline)
 def simulation(tf:float,dt:float,fr:int)->None:
     box=bounding_box((40,40), (-20,-20))
-    particles=[particle(numpy.array([random.uniform(-19,19),random.uniform(-19,19)]), numpy.array([random.uniform(-5,5),random.uniform(-5,5)]), 1.0, 1.0, "k"),
-               particle(numpy.array([random.uniform(-19,19),random.uniform(-19,19)]), numpy.array([random.uniform(-5,5),random.uniform(-5,5)]), 1.0, 1.0, "r"),
-               particle(numpy.array([random.uniform(-19,19),random.uniform(-19,19)]), numpy.array([random.uniform(-5,5),random.uniform(-5,5)]), 1.0, 1.0, "orange"),
-               particle(numpy.array([random.uniform(-19,19),random.uniform(-19,19)]), numpy.array([random.uniform(-5,5),random.uniform(-5,5)]), 1.0, 1.0, "y"),
-               particle(numpy.array([random.uniform(-19,19),random.uniform(-19,19)]), numpy.array([random.uniform(-5,5),random.uniform(-5,5)]), 1.0, 1.0, "green"),
-               particle(numpy.array([random.uniform(-19,19),random.uniform(-19,19)]), numpy.array([random.uniform(-5,5),random.uniform(-5,5)]), 1.0, 1.0, "cyan"),
-               particle(numpy.array([random.uniform(-19,19),random.uniform(-19,19)]), numpy.array([random.uniform(-5,5),random.uniform(-5,5)]), 1.0, 1.0, "blue"),
-               particle(numpy.array([random.uniform(-19,19),random.uniform(-19,19)]), numpy.array([random.uniform(-5,5),random.uniform(-5,5)]), 1.0, 1.0, "purple"),
-               particle(numpy.array([random.uniform(-19,19),random.uniform(-19,19)]), numpy.array([random.uniform(-5,5),random.uniform(-5,5)]), 1.0, 1.0, "pink"),
-               particle(numpy.array([random.uniform(-19,19),random.uniform(-19,19)]), numpy.array([random.uniform(-5,5),random.uniform(-5,5)]), 1.0, 1.0, "gray")]
+    particles=[particle(numpy.random.uniform(-19,19,size=2), numpy.random.uniform(-5,5,size=2), 1.0, 1.0, "k"),
+               particle(numpy.random.uniform(-19,19,size=2), numpy.random.uniform(-5,5,size=2), 1.0, 1.0, "r"),
+               particle(numpy.random.uniform(-19,19,size=2), numpy.random.uniform(-5,5,size=2), 1.0, 1.0, "orange"),
+               particle(numpy.random.uniform(-19,19,size=2), numpy.random.uniform(-5,5,size=2), 1.0, 1.0, "y"),
+               particle(numpy.random.uniform(-19,19,size=2), numpy.random.uniform(-5,5,size=2), 1.0, 1.0, "green"),
+               particle(numpy.random.uniform(-19,19,size=2), numpy.random.uniform(-5,5,size=2), 1.0, 1.0, "cyan"),
+               particle(numpy.random.uniform(-19,19,size=2), numpy.random.uniform(-5,5,size=2), 1.0, 1.0, "blue"),
+               particle(numpy.random.uniform(-19,19,size=2), numpy.random.uniform(-5,5,size=2), 1.0, 1.0, "purple"),
+               particle(numpy.random.uniform(-19,19,size=2), numpy.random.uniform(-5,5,size=2), 1.0, 1.0, "pink"),
+               particle(numpy.random.uniform(-19,19,size=2), numpy.random.uniform(-5,5,size=2), 1.0, 1.0, "gray")]
     info,tl=simulate(particles,box,tf,dt)
     fig=plt.figure(figsize=(10,10))
     ax=fig.add_subplot(221)
     ax1=fig.add_subplot(222)
     ax2=fig.add_subplot(224)
+    ax3=fig.add_subplot(223)
     def start():
         ax.set(xlim=box.get_limits_x(),ylim=box.get_limits_y())
     def update(i):
@@ -107,25 +108,35 @@ def simulation(tf:float,dt:float,fr:int)->None:
         ax.set_title(r'$ t=%.2f \ s$' %(tl[i*fr]))
         ax1.set_title("Momento lineal en x")
         ax2.set_title("Momento lineal en y")
+        ax3.set_title("Energía cinética")
+        x1=numpy.zeros_like(tl)
+        x2=numpy.zeros_like(tl)
         for j in range(len(info)):
+            kinetic=numpy.sum(info[j][:,3]*info[j][:,1],axis=1)/2
             st=info[j][i*fr]
             ax.add_patch(plt.Circle((st[0,0],st[0,1]),particles[j].r, fill=True, color=particles[j].color))
             ax.arrow(st[0,0],st[0,1],st[1,0],st[1,1],color='r',head_width=1,length_includes_head=True)
             ax.arrow(st[0,0],st[0,1],st[2,0],st[2,1],color='b',head_width=1,length_includes_head=True)
             ax1.plot(tl,info[j][:,3,0],c=particles[j].color)
             ax2.plot(tl,info[j][:,3,1],c=particles[j].color)
-        ax1.axvline(tl[i*fr])
-        ax2.axvline(tl[i*fr])
+            ax3.plot(tl,kinetic,c=particles[j].color)
+            x1+=info[j][:,3,0]
+            x2+=info[j][:,3,1]
+        ax1.plot(tl,x1,linestyle="--",c="red",label="total")
+        ax2.plot(tl,x2,linestyle="--",c="red",label="total")
+        ax1.legend()
+        ax2.legend()
+        ax1.axvline(tl[i*fr],c="r")
+        ax2.axvline(tl[i*fr],c="r")
     start()
     Animation = anim.FuncAnimation(fig,update,frames=int(len(tl)/fr),init_func=start,interval=1000*dt*fr)
     plt.show()
 while True:
     a=input("""\nProblema 2.08 Choques de duración finita\nSeleccione:
-1. Correr simulación.\n2. ¿Qué significa la constate K?\n3. Salir.\n""")
+1. Correr simulación y mostrar la gráficas de momento y energía.\n2. ¿Qué significa la constate K?\n3. Salir.\n""")
     if a=="1":
         k=float(input("Ingrese la constante K.\n"))
-        simulation(float(input("Ingrese el tiempo a simular.\n")),
-float(input("Ingrese el tiempo de un paso de simulación.\n")),int(input("Ingrese la cantidad de pasos de simulación por fotograma.\n")))
+        simulation(float(10), float(0.001),50)
     elif a=="2":
         print("Creo que el significado de la constante K es la resistencia a la deformación del material. Si un material tiene una K pequeña, este se deformará fácilmente y será más fácil atravesar el material en lugar de colisionar con el. Si K es un número grande, el material no se deformará y será más fácil chocar con él que atravesarlo.")
     elif a=="3":

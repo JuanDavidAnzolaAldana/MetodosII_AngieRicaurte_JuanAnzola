@@ -125,12 +125,13 @@ def simulation(tf:float,dt:float,fr:int)->None:
         x6=numpy.zeros_like(tl)
         for j in range(len(info)):
             kinetic=numpy.sum(info[j][:,3]*info[j][:,1],axis=1)/2
-            ax1.plot(tl,info[j][:,3,0],c=particles[j].color)
-            ax2.plot(tl,info[j][:,3,1],c=particles[j].color)
-            ax3.plot(tl,kinetic,c=particles[j].color)
-            ax4.plot(tl,info[j][:,4,0],c=particles[j].color)
-            ax5.plot(tl,info[j][:,4,0]+kinetic,c=particles[j].color)
-            ax6.plot(tl,info[j][:,4,1],c=particles[j].color)
+            if boo:
+                ax1.plot(tl,info[j][:,3,0],c=particles[j].color)
+                ax2.plot(tl,info[j][:,3,1],c=particles[j].color)
+                ax3.plot(tl,kinetic,c=particles[j].color)
+                ax4.plot(tl,info[j][:,4,0],c=particles[j].color)
+                ax5.plot(tl,info[j][:,4,0]+kinetic,c=particles[j].color)
+                ax6.plot(tl,info[j][:,4,1],c=particles[j].color)
             x1+=info[j][:,3,0]
             x2+=info[j][:,3,1]
             x3+=kinetic
@@ -167,7 +168,7 @@ def simulation(tf:float,dt:float,fr:int)->None:
     Animation = anim.FuncAnimation(fig,update,frames=int(len(tl)/fr),init_func=start,interval=1000*dt*fr)
     plt.show()
 print("Se va a correr la simulación y se va a mostrar todas las gráficas de momento lineal, momento angular y energía al mismo tiempo.")
+boo="1"==input("Si quiere mostrar las gráficas de todas las partículas digite 1, de lo corntrario digite cualquier otra cosa.\n")
 print("las respuestas a las preguntas se encuentran en un archivo llamado \"punto 2 teórico\".")
 k=float(input("Ingrese la constante K.\n"))
 simulation(float(10), float(0.001),200)
-

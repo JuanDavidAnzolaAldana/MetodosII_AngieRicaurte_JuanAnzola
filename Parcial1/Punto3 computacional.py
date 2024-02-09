@@ -76,7 +76,11 @@ def simulate(particles:list,bounds:bounding_box,maxtime:float,deltatime:float)->
         for j in particles:
             j.move(deltatime)
     return (info,timeline)
+info=0
+tl=0
 def simulation(tf:float,dt:float,fr:int)->None:
+    global info
+    global tl
     box=bounding_box((40,40), (-20,-20))
     particles=[particle(numpy.array((-15.0,-10.0)), numpy.array((2.0,0.0)),1.0,2.0, "r")]
     info,tl=simulate(particles,box,tf,dt)
@@ -111,3 +115,30 @@ boo=True
 k=1
 e=0.9
 simulation(float(10),0.001,200)
+maximos=[]
+minimos=[]
+decreciente=False
+for i in range(0,info[0].shape[0]-1):
+    if info[0][i,0,1]>info[0][i+1,0,1]:
+        if not decreciente:
+            maximos.append(i)
+        decreciente=True
+    else:
+        if decreciente:
+            minimos.append(i)
+        decreciente=False
+print(maximos)
+print(minimos)
+tchoques=[]
+for i in range(0,len(minimos)-1):
+    tchoques.append(tl[minimos[i+1]]-tl[minimos[i]])
+print()
+print("Tiempos entre choques:")
+print(tchoques)
+estima=[]
+for i in range(0,len(maximos)-1):
+    val=info[0][maximos[i+1]+20,0,1]/info[0][maximos[i]+20,0,1]
+    estima.append(numpy.sqrt(val))
+print()
+print("Estimaciones del coeficiente de restitución:")
+print(estima)

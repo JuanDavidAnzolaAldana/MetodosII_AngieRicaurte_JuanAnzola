@@ -137,7 +137,8 @@ print("Tiempos entre choques:")
 print(tchoques)
 estima=[]
 for i in range(0,len(maximos)-1):
-    val=info[0][maximos[i+1]+20,0,1]/info[0][maximos[i]+20,0,1]
+    print(maximos)
+    val=(info[0][maximos[i+1],0,1]+20)/(info[0][maximos[i],0,1]+20)
     estima.append(numpy.sqrt(val))
 print()
 print("Estimaciones del coeficiente de restitución:")

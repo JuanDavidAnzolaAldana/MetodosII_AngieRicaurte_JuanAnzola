@@ -16,8 +16,8 @@ def derivada(x:numpy.array,t):
     return numpy.array([r,f,pr,pf])
 r0=6.3781e6/3.844e8
 rl=1.7374e6/3.844e8
-f0=numpy.pi/5
-v0=11120/3.844e8
+f0=numpy.pi/3
+v0=11086/3.844e8
 theta=f0
 pr0=v0*numpy.cos(f0-theta)
 pf0=r0*v0*numpy.sin(theta-f0)
@@ -40,18 +40,18 @@ def animar(tf)->None:
     h=1.0
     timeline=numpy.arange(0,tf,h)
     px,py=rungekutta(timeline,h)
-    fig=plt.figure(figsize=(5,5))
+    fig=plt.figure(figsize=(7,7))
     ax=fig.add_subplot(111)
     def start():
         pass
     def update(i):
         rad=omega*timeline[i*1000]
         ax.clear()
-        ax.set(xlim=[-1.2,1.2],ylim=[-1.2,1.2])
-        ax.set_title(r'$ t=%.2f \ s$' %(timeline[i*1000]))
+        ax.set(xlim=[-0.05,1.1],ylim=[-0.05,1.1])
+        ax.set_title("t="+str(timeline[i*1000])+"segundos="+"{:.{}f}".format(timeline[i*1000]/86400.0,2)+"dias")
         ax.add_patch(plt.Circle((0,0),r0, fill=True, color="b"))
         ax.add_patch(plt.Circle((numpy.cos(rad),numpy.sin(rad)),rl, fill=True, color="k"))
-        ax.add_patch(patch.RegularPolygon((px[i*1000],py[i*1000]),3,0.012,color="r"))
+        ax.add_patch(plt.Circle((px[i*1000],py[i*1000]),0.0005,color="r"))
     Animation = anim.FuncAnimation(fig,update,frames=int(len(timeline)/1000),init_func=start,interval=2)
     plt.show()
-animar(300000)
+animar(860000)

@@ -2,7 +2,7 @@ import numpy
 import matplotlib.pyplot as plt
 import tqdm
 import matplotlib.animation as anim
-dt=0.1
+dt=0.01
 x = numpy.arange(0, 1.2, 0.2)
 t=numpy.arange(0, 1+dt, dt)
 space=numpy.zeros((t.size,x.size,x.size))
@@ -29,6 +29,6 @@ def animar(space):
         ax.plot_surface(X, Y, space[i])
         ax.set_title("t={:.2f}".format(t[i]))
         ax.set(xlim=(0,1),ylim=(0,1),zlim=(-5,5))
-    Animation = anim.FuncAnimation(fig,update,frames=t.size,interval=500)
+    Animation = anim.FuncAnimation(fig,update,frames=t.size,interval=50)
     plt.show()
 animar(space)
